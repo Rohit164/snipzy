@@ -116,5 +116,6 @@ def download(filename):
 
 if __name__ == "__main__":
     check_ffmpeg()
-    # host=0.0.0.0 makes it accessible on your local network (phone on same WiFi)
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    # HF Spaces requires port 7860; locally falls back to 5000
+    port = int(os.environ.get("PORT", 7860))
+    app.run(host="0.0.0.0", port=port, debug=False)
