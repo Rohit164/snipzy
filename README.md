@@ -1,3 +1,12 @@
+---
+title: Snipzy
+emoji: ✂️
+colorFrom: purple
+colorTo: black
+sdk: docker
+pinned: false
+---
+
 # ✂ snipzy
 
 > remove text, watermarks, and usernames from any video — no GPU required
