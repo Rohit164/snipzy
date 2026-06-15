@@ -2,6 +2,8 @@
 
 > remove text, watermarks, and usernames from any video — no GPU required
 
+![snipzy interface](docs/screenshot.png)
+
 snipzy scans your video frame by frame, finds the text you want gone using OCR, masks it out, and inpaints over it so the background looks natural. then it stitches everything back into a clean output video with the original audio intact.
 
 ---
