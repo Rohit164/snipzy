@@ -17,18 +17,20 @@ ENV HOME=/home/user \
 
 WORKDIR /home/user/app
 
-# Install Python deps
-COPY --chown=user requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
-
-# Copy app files
+# Copy everything first
 COPY --chown=user . .
+
+# Install Python deps explicitly
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir \
+    flask \
+    opencv-python-headless \
+    numpy \
+    rapidocr-onnxruntime
 
 # Create required dirs
 RUN mkdir -p uploads outputs
 
-# HF Spaces expects port 7860
 EXPOSE 7860
 
 CMD ["python", "app.py"]
