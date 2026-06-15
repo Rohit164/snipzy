@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env
+
+# Temp processing files
+temp/
+temp_*/
+
+# Upload/output folders (user data)
+uploads/
+outputs/
+
+# Video files
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Logs
+*.log

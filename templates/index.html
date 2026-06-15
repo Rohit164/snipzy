@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snipzy</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Space Mono', 'Courier New', monospace;
+      background: #000;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 60px;
+      min-height: 100vh;
+      border-right: 1px solid #1a1a1a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-btn {
+      width: 44px;
+      height: 44px;
+      background: none;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.42rem;
+      transition: color 0.15s, background 0.15s;
+      padding: 4px;
+    }
+    .sidebar-btn:hover { color: #fff; background: #111; }
+    .sidebar-btn.active { color: #fff; }
+    .sidebar-btn svg { width: 18px; height: 18px; }
+
+    .sidebar-top { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 8px; }
+    .sidebar-bottom { display: flex; flex-direction: column; align-items: center; gap: 4px; padding-bottom: 8px; }
+
+    .expand-btn {
+      width: 44px; height: 32px;
+      background: none; border: none;
+      color: #aaa; cursor: pointer;
+      font-size: 0.75rem; letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .expand-btn:hover { color: #fff; }
+
+    /* ── Main ── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+    }
+
+    /* top bar */
+    .top-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    .top-bar-btn {
+      background: none; border: none;
+      color: #aaa; cursor: pointer;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      display: flex; align-items: center; gap: 6px;
+      padding: 0 12px;
+    }
+    .top-bar-btn:hover { color: #fff; }
+
+    .dl-btn-top {
+      position: absolute;
+      right: 16px;
+      width: 28px; height: 28px;
+      background: #fff;
+      border: none; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .dl-btn-top.show { opacity: 1; }
+    .dl-btn-top svg { width: 14px; height: 14px; color: #000; }
+
+    /* mascot */
+    .mascot {
+      margin-bottom: 28px;
+      opacity: 0.9;
+    }
+    .mascot svg { width: 110px; height: 110px; }
+
+    /* input bar */
+    .input-bar {
+      display: flex;
+      align-items: center;
+      background: #0a0a0a;
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      width: 100%;
+      max-width: 460px;
+      padding: 0 12px;
+      gap: 8px;
+      height: 44px;
+    }
+    .input-bar svg { width: 16px; height: 16px; color: #888; flex-shrink: 0; }
+    .input-bar input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.82rem;
+    }
+    .input-bar input::placeholder { color: #666; }
+    .clear-btn {
+      background: none; border: none;
+      color: #888; cursor: pointer; font-size: 1rem; line-height: 1;
+      padding: 0 2px;
+    }
+    .clear-btn:hover { color: #fff; }
+    .go-btn {
+      background: #1a1a1a;
+      border: none; border-radius: 4px;
+      color: #fff; cursor: pointer;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      padding: 5px 10px;
+      display: flex; align-items: center;
+    }
+    .go-btn:hover { background: #2a2a2a; }
+    .go-btn:disabled { color: #333; cursor: not-allowed; }
+
+    /* pill buttons row */
+    .pills {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .pill {
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 20px;
+      color: #ccc;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      padding: 6px 14px;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .pill:hover { border-color: #777; color: #fff; }
+    .pill.active { border-color: #fff; color: #fff; }
+    .pill .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      display: inline-block; flex-shrink: 0;
+    }
+
+    /* file drop overlay */
+    .file-zone {
+      width: 100%;
+      max-width: 460px;
+      border: 1px dashed #222;
+      border-radius: 6px;
+      padding: 18px;
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+      display: none;
+    }
+    .file-zone.visible { display: block; }
+    .file-zone:hover, .file-zone.dragover { border-color: #777; }
+    .file-zone p { color: #888; font-size: 0.75rem; }
+    .file-zone .fname { color: #bbb; font-size: 0.72rem; margin-top: 6px; word-break: break-all; }
+    input[type="file"] { display: none; }
+
+    /* status */
+    .status-area {
+      width: 100%;
+      max-width: 460px;
+      margin-top: 16px;
+      display: none;
+    }
+    .status-area.show { display: block; }
+
+    .status-line {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.75rem; color: #aaa;
+      margin-bottom: 8px;
+    }
+    .spinner {
+      width: 12px; height: 12px;
+      border: 1.5px solid #333;
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .prog-track {
+      height: 2px;
+      background: #1a1a1a;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .prog-fill {
+      height: 100%;
+      width: 0%;
+      background: #fff;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+    .prog-fill.done { background: #4ade80; width: 100%; }
+
+    .prog-meta {
+      display: flex; justify-content: space-between;
+      font-size: 0.68rem; color: #888; margin-top: 5px;
+    }
+
+    .download-pill {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 14px;
+      background: #0f0f0f;
+      border: 1px solid #2a2a2a;
+      border-radius: 20px;
+      padding: 8px 16px;
+      text-decoration: none;
+      color: #fff;
+      font-size: 0.75rem;
+      width: fit-content;
+      transition: border-color 0.2s;
+    }
+    .download-pill:hover { border-color: #555; }
+    .download-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; }
+
+    .err-txt { color: #f87171; font-size: 0.75rem; margin-top: 8px; }
+
+    /* footer */
+    .footer {
+      position: absolute;
+      bottom: 14px;
+      font-size: 0.65rem;
+      color: #555;
+      letter-spacing: 0.5px;
+    }
+    .footer a { color: #777; text-decoration: none; }
+    .footer a:hover { color: #fff; }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <button class="expand-btn">>></button>
+    <div class="sidebar-top">
+      <button class="sidebar-btn active" title="save">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        save
+      </button>
+      <button class="sidebar-btn" title="remix" onclick="resetForm()">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+        remix
+      </button>
+    </div>
+    <div class="sidebar-bottom">
+      <button class="sidebar-btn" title="settings">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        settings
+      </button>
+      <button class="sidebar-btn" title="about">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        about
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Top bar -->
+    <div class="top-bar">
+      <button class="top-bar-btn" onclick="document.getElementById('fileInput').click()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        supported formats: mp4 · mov · avi · mkv · webm
+      </button>
+      <a class="dl-btn-top" id="dlBtnTop" href="#" title="download">
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      </a>
+    </div>
+
+    <!-- Mascot -->
+    <div class="mascot">
+      <!-- hand-drawn style scissors / snip mascot -->
+      <svg viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- scissors body -->
+        <circle cx="30" cy="75" r="12" stroke="#fff" stroke-width="2.5" fill="none"/>
+        <circle cx="30" cy="75" r="5" fill="#fff" opacity="0.15"/>
+        <circle cx="80" cy="75" r="12" stroke="#fff" stroke-width="2.5" fill="none"/>
+        <circle cx="80" cy="75" r="5" fill="#fff" opacity="0.15"/>
+        <!-- blades -->
+        <line x1="38" y1="68" x2="55" y2="45" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="72" y1="68" x2="55" y2="45" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- screw -->
+        <circle cx="55" cy="45" r="4" fill="#fff" opacity="0.9"/>
+        <!-- handle tips -->
+        <line x1="22" y1="80" x2="14" y2="90" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <line x1="88" y1="80" x2="96" y2="90" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+        <!-- snip text -->
+        <text x="55" y="28" text-anchor="middle" fill="#fff" font-family="monospace" font-size="11" opacity="0.6">snip</text>
+      </svg>
+    </div>
+
+    <!-- File zone (shown when no file picked) -->
+    <div class="file-zone visible" id="fileZone">
+      <p>drag & drop a video or click the bar below</p>
+      <div class="fname" id="fileName"></div>
+    </div>
+    <input type="file" id="fileInput" accept="video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm" />
+
+    <!-- Input bar -->
+    <div class="input-bar">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+      <input type="text" id="targetText" placeholder="text or watermark to remove — e.g. @username" />
+      <button class="clear-btn" onclick="clearText()" title="clear">✕</button>
+      <button class="go-btn" id="goBtn" onclick="startJob()">>></button>
+    </div>
+
+    <!-- Pills row -->
+    <div class="pills">
+      <div class="pill active" onclick="togglePill(this,'quality','720p')">
+        <span class="dot" style="background:#a78bfa"></span> 720p
+      </div>
+      <div class="pill" onclick="togglePill(this,'quality','1080p')">
+        <span class="dot" style="background:#60a5fa"></span> 1080p
+      </div>
+      <div class="pill" onclick="togglePill(this,'quality','480p')">
+        <span class="dot" style="background:#34d399"></span> 480p
+      </div>
+      <div class="pill" onclick="document.getElementById('fileInput').click()">
+        <span class="dot" style="background:#f59e0b"></span> pick file
+      </div>
+      <div class="pill" id="ocrPill" onclick="cycleOcr(this)">
+        <span class="dot" style="background:#f472b6"></span> ocr ×10
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="status-area" id="statusArea">
+      <div class="status-line">
+        <div class="spinner" id="spinner"></div>
+        <span id="statusText">processing...</span>
+      </div>
+      <div class="prog-track">
+        <div class="prog-fill" id="progFill"></div>
+      </div>
+      <div class="prog-meta">
+        <span id="progPhase"></span>
+        <span id="progPct">0%</span>
+      </div>
+      <div id="downloadArea"></div>
+      <div class="err-txt" id="errorMsg"></div>
+    </div>
+
+    <p class="footer">
+      by continuing, you agree to <a href="#">terms</a> and <a href="#">ethics of use</a>
+    </p>
+  </main>
+
+  <script>
+    // State
+    let selectedFile = null;
+    let selectedQuality = '720p';
+    let ocrEvery = 10;
+    const ocrOptions = [5, 10, 15, 20];
+    let ocrIdx = 1;
+
+    // File input
+    const fileInput = document.getElementById('fileInput');
+    const fileZone  = document.getElementById('fileZone');
+
+    fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
+
+    // Drag onto the whole page
+    document.addEventListener('dragover', e => { e.preventDefault(); fileZone.classList.add('dragover'); });
+    document.addEventListener('dragleave', () => fileZone.classList.remove('dragover'));
+    document.addEventListener('drop', e => {
+      e.preventDefault();
+      fileZone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+    });
+
+    fileZone.addEventListener('click', () => fileInput.click());
+
+    function setFile(file) {
+      selectedFile = file;
+      document.getElementById('fileName').textContent = '▸ ' + file.name;
+      fileZone.querySelector('p').textContent = 'file selected';
+    }
+
+    function clearText() {
+      document.getElementById('targetText').value = '';
+    }
+
+    function togglePill(el, type, value) {
+      if (type === 'quality') {
+        document.querySelectorAll('.pill').forEach(p => {
+          if (['720p','1080p','480p'].some(q => p.textContent.trim().includes(q))) p.classList.remove('active');
+        });
+        el.classList.add('active');
+        selectedQuality = value;
+      }
+    }
+
+    function cycleOcr(el) {
+      ocrIdx = (ocrIdx + 1) % ocrOptions.length;
+      ocrEvery = ocrOptions[ocrIdx];
+      el.querySelector('.dot').nextSibling.textContent = ` ocr ×${ocrEvery}`;
+    }
+
+    function resetForm() {
+      selectedFile = null;
+      document.getElementById('fileName').textContent = '';
+      document.getElementById('targetText').value = '';
+      document.getElementById('statusArea').classList.remove('show');
+      document.getElementById('downloadArea').innerHTML = '';
+      document.getElementById('errorMsg').textContent = '';
+      fileZone.querySelector('p').textContent = 'drag & drop a video or click the bar below';
+      document.getElementById('goBtn').disabled = false;
+      document.getElementById('goBtn').textContent = '>>';
+      document.getElementById('dlBtnTop').classList.remove('show');
+    }
+
+    async function startJob() {
+      if (!selectedFile) { alert('Pick a video file first.'); return; }
+      const text = document.getElementById('targetText').value.trim();
+      if (!text) { alert('Enter the text/watermark to remove.'); return; }
+
+      const goBtn = document.getElementById('goBtn');
+      goBtn.disabled = true;
+      goBtn.textContent = '..';
+
+      const statusArea = document.getElementById('statusArea');
+      statusArea.classList.add('show');
+      document.getElementById('statusText').textContent = 'uploading...';
+      document.getElementById('downloadArea').innerHTML = '';
+      document.getElementById('errorMsg').textContent = '';
+      document.getElementById('progFill').classList.remove('done');
+      document.getElementById('progFill').style.width = '0%';
+      document.getElementById('progPct').textContent = '0%';
+      document.getElementById('spinner').style.display = '';
+
+      const form = new FormData();
+      form.append('video', selectedFile);
+      form.append('text', text);
+      form.append('quality', selectedQuality);
+      form.append('ocr_every', ocrEvery);
+
+      const res  = await fetch('/upload', { method: 'POST', body: form });
+      const data = await res.json();
+
+      if (data.error) { showError(data.error); goBtn.disabled = false; goBtn.textContent = '>>'; return; }
+
+      document.getElementById('statusText').textContent = 'processing...';
+      pollStatus(data.job_id);
+    }
+
+    function pollStatus(jobId) {
+      const iv = setInterval(async () => {
+        const res = await fetch(`/status/${jobId}`);
+        const job = await res.json();
+
+        const pct = job.percent || 0;
+        document.getElementById('progFill').style.width = pct + '%';
+        document.getElementById('progPct').textContent = pct + '%';
+
+        // parse phase from progress string
+        const prog = job.progress || '';
+        if (prog.includes('Scanning'))   document.getElementById('progPhase').textContent = 'scanning';
+        else if (prog.includes('Inpaint')) document.getElementById('progPhase').textContent = 'inpainting';
+        else if (prog.includes('Compil'))  document.getElementById('progPhase').textContent = 'compiling';
+        document.getElementById('statusText').textContent = prog.toLowerCase();
+
+        if (job.status === 'done') {
+          clearInterval(iv);
+          document.getElementById('progFill').classList.add('done');
+          document.getElementById('progPct').textContent = '100%';
+          document.getElementById('statusText').textContent = 'done.';
+          document.getElementById('spinner').style.display = 'none';
+
+          // top download button
+          const dlTop = document.getElementById('dlBtnTop');
+          dlTop.href = `/download/${job.output}`;
+          dlTop.classList.add('show');
+
+          document.getElementById('downloadArea').innerHTML =
+            `<a class="download-pill" href="/download/${job.output}">
+               <span class="dot"></span> download cleaned video
+             </a>`;
+          document.getElementById('goBtn').disabled = false;
+          document.getElementById('goBtn').textContent = '>>';
+        } else if (job.status === 'error') {
+          clearInterval(iv);
+          showError(job.error);
+          document.getElementById('goBtn').disabled = false;
+          document.getElementById('goBtn').textContent = '>>';
+        }
+      }, 2000);
+    }
+
+    function showError(msg) {
+      document.getElementById('errorMsg').textContent = '✕ ' + msg;
+      document.getElementById('spinner').style.display = 'none';
+      document.getElementById('statusText').textContent = 'failed.';
+    }
+  </script>
+</body>
+</html>
