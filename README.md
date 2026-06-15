@@ -2,7 +2,7 @@
 title: Snipzy
 emoji: ✂️
 colorFrom: purple
-colorTo: black
+colorTo: gray
 sdk: docker
 pinned: false
 ---
